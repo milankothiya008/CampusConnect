@@ -1,0 +1,823 @@
+/* ================================================================ Tickets & check-in */
+
+/* ---------------------------------------------------------------- Ticket (student side) */
+.ticket {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 22px 44px -30px rgba(17, 28, 77, 0.55);
+    animation: rise-in 0.4s var(--ease-out) both;
+}
+
+.ticket.is-loading {
+    padding: 16px;
+}
+
+.ticket-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    color: #fff;
+    background: linear-gradient(135deg, #0c1538 0%, #1b2a6b 55%, #2c46b0 100%);
+}
+
+.ticket-head .avatar {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.ticket-club {
+    display: block;
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #cdd6fb;
+}
+
+.ticket-title {
+    display: block;
+    font-size: 0.98rem;
+    line-height: 1.25;
+}
+
+.ticket-stub {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex: none;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--gold-500);
+}
+
+.ticket-qr {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 18px 16px 10px;
+    background: #fff;
+}
+
+.ticket-qr img {
+    width: min(100%, 240px);
+    aspect-ratio: 1;
+    image-rendering: pixelated;
+    border-radius: 10px;
+    transition: opacity 0.3s ease;
+}
+
+.ticket-modal .ticket-qr img {
+    width: min(100%, 300px);
+}
+
+.ticket.is-checked .ticket-qr img {
+    opacity: 0.35;
+}
+
+.ticket-checked-stamp {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--success-600);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 10px 24px -10px rgba(15, 138, 95, 0.8);
+    transform: rotate(-8deg);
+    animation: stamp-in 0.45s var(--ease-spring) both;
+}
+
+@keyframes stamp-in {
+    from {
+        opacity: 0;
+        transform: rotate(-8deg) scale(1.6);
+    }
+}
+
+/* Torn edge between the QR and the details, like a paper ticket. */
+.ticket-perforation {
+    position: relative;
+    height: 0;
+    border-top: 2px dashed var(--border);
+    margin: 0 14px;
+}
+
+.ticket-perforation::before,
+.ticket-perforation::after {
+    content: "";
+    position: absolute;
+    top: -12px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.ticket-perforation::before {
+    left: -26px;
+}
+
+.ticket-perforation::after {
+    right: -26px;
+}
+
+.ticket-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+}
+
+.ticket-code {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px;
+    border-radius: 12px;
+    background: var(--ink-50);
+    border: 1px dashed var(--ink-100);
+}
+
+.ticket-code small {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.ticket-code b {
+    font-family: Consolas, Menlo, monospace;
+    font-size: 1.35rem;
+    letter-spacing: 0.12em;
+    color: var(--ink-800);
+}
+
+.ticket-modal .ticket-code b {
+    font-size: 1.55rem;
+}
+
+.ticket-meta {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+}
+
+.ticket-meta div {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 8px;
+    align-items: baseline;
+}
+
+.ticket-meta dt {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+}
+
+.ticket-meta dd {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+.ticket-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: var(--surface-muted);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.ticket.is-checked .ticket-note {
+    background: var(--success-100);
+    color: var(--success-600);
+    font-weight: 600;
+}
+
+.ticket-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ticket-modal .ticket {
+    box-shadow: none;
+}
+
+/* Notches cut into the modal's own surface. */
+.ticket-modal .ticket-perforation::before,
+.ticket-modal .ticket-perforation::after {
+    background: var(--surface);
+}
+
+.ticket-sent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+}
+
+/* ---------------------------------------------------------------- Check-in page (club side) */
+.checkin-stats {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 16px 18px 22px;
+    border-radius: var(--radius-xl);
+    color: #fff;
+    background: linear-gradient(135deg, #0c1538 0%, #1b2a6b 55%, #2c46b0 100%);
+    box-shadow: 0 22px 44px -30px rgba(17, 28, 77, 0.65);
+}
+
+.checkin-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.checkin-stat.is-primary {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.checkin-stat-value {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.checkin-stat-label {
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #cdd6fb;
+}
+
+.checkin-progress {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 10px;
+    height: 5px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+}
+
+.checkin-progress span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-500), #4ade80);
+    transition: width 0.6s var(--ease-out);
+}
+
+.checkin-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 22px;
+    align-items: start;
+}
+
+/* Scan tab */
+.checkin-scan {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkin-viewport {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    max-height: 62vh;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #05081a;
+    border: 1px solid var(--border);
+}
+
+.checkin-viewport video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.checkin-viewport:not(.is-live) video {
+    display: none;
+}
+
+.checkin-reticle {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: min(62%, 300px);
+    aspect-ratio: 1;
+    border-radius: 18px;
+    box-shadow: 0 0 0 100vmax rgba(5, 8, 26, 0.45);
+    pointer-events: none;
+}
+
+.checkin-reticle::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.85);
+    mask: linear-gradient(#000 0 0) padding-box, conic-gradient(from 0deg, #000 0 0) border-box;
+}
+
+.checkin-reticle::after {
+    content: "";
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    top: 12%;
+    height: 2px;
+    background: var(--gold-500);
+    box-shadow: 0 0 12px var(--gold-500);
+    animation: scan-sweep 2.2s ease-in-out infinite;
+}
+
+@keyframes scan-sweep {
+    50% {
+        top: 86%;
+    }
+}
+
+.checkin-viewport-idle {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px;
+    text-align: center;
+    color: #fff;
+    background:
+        radial-gradient(320px 200px at 80% 10%, rgba(236, 72, 153, 0.35), transparent 70%),
+        radial-gradient(300px 220px at 10% 90%, rgba(56, 189, 248, 0.3), transparent 70%),
+        #0c1538;
+}
+
+.checkin-viewport-idle p {
+    max-width: 38ch;
+    margin: 0 0 6px;
+    color: #cdd6fb;
+    font-size: 0.9rem;
+}
+
+.checkin-camera-icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+/* Result overlay */
+.scan-result {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    color: #fff;
+    cursor: pointer;
+    animation: scan-pop 0.35s var(--ease-spring) both;
+}
+
+.scan-result strong {
+    display: block;
+    font-size: 1.05rem;
+}
+
+.scan-result span {
+    font-size: 0.84rem;
+    opacity: 0.9;
+}
+
+.scan-result.is-ok {
+    background: linear-gradient(135deg, #0f8a5f, #22c55e);
+}
+
+.scan-result.is-warn {
+    background: linear-gradient(135deg, #b45309, #f59e0b);
+}
+
+.scan-result.is-bad {
+    background: linear-gradient(135deg, #991b1b, #ef4444);
+}
+
+.scan-result.is-info {
+    background: linear-gradient(135deg, #1b2a6b, #3c5bd6);
+}
+
+@keyframes scan-pop {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.97);
+    }
+}
+
+/* Scan outcome, drawn over the camera area once the camera has paused */
+.scan-outcome {
+    --tint: linear-gradient(160deg, rgba(5, 8, 26, 0.78), rgba(27, 42, 107, 0.7));
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    color: #fff;
+    animation: outcome-in 0.3s ease-out both;
+}
+
+.scan-outcome.is-ok {
+    --tint: linear-gradient(160deg, rgba(6, 95, 70, 0.9), rgba(22, 163, 74, 0.82));
+}
+
+.scan-outcome.is-warn {
+    --tint: linear-gradient(160deg, rgba(146, 64, 14, 0.9), rgba(217, 119, 6, 0.84));
+}
+
+.scan-outcome.is-bad {
+    --tint: linear-gradient(160deg, rgba(127, 29, 29, 0.92), rgba(220, 38, 38, 0.84));
+}
+
+.scan-outcome.is-info {
+    --tint: linear-gradient(160deg, rgba(27, 42, 107, 0.92), rgba(60, 91, 214, 0.84));
+}
+
+/* Colour wash over the frozen frame, and a quick shutter flash as the camera pauses. */
+.scan-outcome::before,
+.scan-outcome::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.scan-outcome::before {
+    z-index: 1;
+    background: var(--tint);
+    transition: background 0.3s ease;
+}
+
+.scan-outcome::after {
+    z-index: 3;
+    background: #fff;
+    animation: shutter 0.45s ease-out both;
+}
+
+.scan-outcome-still {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(10px) saturate(1.2);
+    transform: scale(1.12);
+}
+
+.scan-outcome-body {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    max-width: 440px;
+    padding: 24px;
+    text-align: center;
+}
+
+.scan-outcome-icon {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    margin-bottom: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    animation: outcome-pop 0.55s var(--ease-spring) 0.1s both;
+}
+
+/* A ring that ripples out once from the icon. */
+.scan-outcome-icon::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    animation: outcome-ring 0.9s ease-out 0.25s both;
+}
+
+.scan-outcome-icon.is-spinning {
+    animation: none;
+}
+
+.scan-outcome-icon.is-spinning::after {
+    display: none;
+}
+
+.scan-outcome-icon .spinner {
+    width: 34px;
+    height: 34px;
+    border-width: 3px;
+    border-color: rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+}
+
+/* Tick and cross draw themselves in. */
+.scan-outcome.is-ok .scan-outcome-icon svg path,
+.scan-outcome.is-bad .scan-outcome-icon svg path {
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    animation: outcome-draw 0.4s ease-out 0.4s forwards;
+}
+
+.scan-outcome.is-bad .scan-outcome-icon {
+    animation:
+        outcome-pop 0.55s var(--ease-spring) 0.1s both,
+        outcome-shake 0.45s ease-in-out 0.6s;
+}
+
+.scan-outcome-title {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    line-height: 1.3;
+    animation: outcome-rise 0.4s var(--ease-out) 0.18s both;
+}
+
+.scan-outcome-person {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.9);
+    overflow-wrap: anywhere;
+    animation: outcome-rise 0.4s var(--ease-out) 0.26s both;
+}
+
+.scan-outcome-person b {
+    font-size: 1.05rem;
+    color: #fff;
+}
+
+.btn.scan-outcome-next {
+    margin-top: 10px;
+    background: #fff;
+    color: var(--ink-800);
+    border-color: transparent;
+    box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.55);
+    animation: outcome-rise 0.4s var(--ease-out) 0.34s both;
+}
+
+.btn.scan-outcome-next:hover {
+    background: #f1f4ff;
+}
+
+@keyframes outcome-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes shutter {
+    from {
+        opacity: 0.55;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes outcome-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+}
+
+@keyframes outcome-ring {
+    from {
+        opacity: 0.9;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(1.8);
+    }
+}
+
+@keyframes outcome-draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes outcome-shake {
+    20%,
+    60% {
+        transform: translateX(-7px);
+    }
+    40%,
+    80% {
+        transform: translateX(7px);
+    }
+}
+
+@keyframes outcome-rise {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+
+/* Search tab */
+.checkin-list,
+.checkin-recent {
+    display: flex;
+    flex-direction: column;
+}
+
+.checkin-row,
+.checkin-recent-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.checkin-row:last-child,
+.checkin-recent-row:last-child {
+    border-bottom: 0;
+}
+
+.checkin-row strong,
+.checkin-recent-row strong {
+    display: block;
+    font-size: 0.92rem;
+}
+
+.checkin-row .subtle,
+.checkin-recent-row .subtle {
+    display: block;
+}
+
+.checkin-row.is-checked {
+    background: rgba(15, 138, 95, 0.05);
+}
+
+.checkin-list {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface);
+}
+
+.checkin-recent-row {
+    padding: 10px 20px;
+    animation: rise-in 0.3s var(--ease-out) both;
+}
+
+.attendance-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 3px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--success-100);
+    color: var(--success-600);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+/* Code tab */
+.checkin-code {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.checkin-code-row {
+    display: flex;
+    gap: 8px;
+}
+
+.checkin-code-prefix {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    border-radius: 12px;
+    background: var(--ink-50);
+    color: var(--ink-600);
+}
+
+.checkin-code-input {
+    flex: 1;
+    font-family: Consolas, Menlo, monospace;
+    font-size: 1.15rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------- Responsive */
+@media (max-width: 960px) {
+    .checkin-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .checkin-stats {
+        gap: 8px;
+        padding: 12px 12px 20px;
+    }
+
+    .checkin-stat {
+        padding: 8px 10px;
+    }
+
+    .checkin-stat-value {
+        font-size: 1.5rem;
+    }
+
+    .checkin-viewport {
+        aspect-ratio: 3 / 4;
+    }
+
+    .checkin-code-row {
+        flex-wrap: wrap;
+    }
+
+    .checkin-code-row .btn {
+        width: 100%;
+    }
+
+    .ticket-meta div {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ticket,
+    .ticket-checked-stamp,
+    .scan-result,
+    .checkin-recent-row,
+    .checkin-reticle::after,
+    .scan-outcome,
+    .scan-outcome::after,
+    .scan-outcome-icon,
+    .scan-outcome-icon::after,
+    .scan-outcome-icon svg path,
+    .scan-outcome-title,
+    .scan-outcome-person,
+    .btn.scan-outcome-next {
+        animation: none !important;
+    }
+
+    .scan-outcome-icon svg path {
+        stroke-dashoffset: 0 !important;
+    }
+
+    .scan-outcome::after,
+    .scan-outcome-icon::after {
+        display: none;
+    }
+}

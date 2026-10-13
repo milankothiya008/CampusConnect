@@ -1,0 +1,26 @@
+# Production (docker compose on the VPS). Secrets come only from the environment.
+spring:
+  data:
+    mongodb:
+      # Indexes are created by the first replica that starts; keep it on so new indexes ship with the code.
+      auto-index-creation: true
+
+server:
+  tomcat:
+    threads:
+      max: 400
+
+app:
+  jwt:
+    cookie-secure: true
+
+logging:
+  level:
+    root: INFO
+    com.campusconnect: INFO
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

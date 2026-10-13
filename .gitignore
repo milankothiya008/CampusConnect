@@ -1,0 +1,22 @@
+# Build output
+backend/target*/
+frontend/dist/
+frontend/node_modules/
+system-tests/node_modules/
+system-tests/test-results/
+system-tests/playwright-report/
+load-tests/target/
+
+# Local data and secrets
+.env
+.env.*
+!.env.example
+deploy/.env
+deploy/certs/
+backend/uploads/
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/

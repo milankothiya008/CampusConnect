@@ -1,0 +1,187 @@
+# CampusConnect API. Every value can be overridden with an environment variable (see ../.env.example);
+# Spring's relaxed binding maps e.g. APP_CLIENT_URL -> app.client-url.
+spring:
+  application:
+    name: campusconnect-api
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  threads:
+    virtual:
+      enabled: true
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/campusconnect?replicaSet=rs0}
+  data:
+    mongodb:
+      auto-index-creation: true
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2s
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 64
+          max-idle: 16
+          min-idle: 4
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        prefetch: 1
+        default-requeue-rejected: false
+        acknowledge-mode: auto
+    template:
+      retry:
+        enabled: true
+        max-attempts: 3
+        initial-interval: 200ms
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASS:}
+    properties:
+      mail.smtp.auth: ${SMTP_AUTH:true}
+      mail.smtp.starttls.enable: ${SMTP_STARTTLS:true}
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 15000
+      mail.smtp.writetimeout: 15000
+  servlet:
+    multipart:
+      # The largest single upload (gallery videos in local storage); each route checks its own limit.
+      max-file-size: 80MB
+      max-request-size: 81MB
+      file-size-threshold: 1MB
+  jackson:
+    default-property-inclusion: always
+  thymeleaf:
+    check-template-location: false
+  mvc:
+    problemdetails:
+      enabled: false
+
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  # Behind Nginx: trust X-Forwarded-For / -Proto from the internal network only.
+  forward-headers-strategy: native
+  compression:
+    enabled: false
+  tomcat:
+    max-connections: 20000
+    accept-count: 1000
+    connection-timeout: 20s
+    keep-alive-timeout: 30s
+    max-keep-alive-requests: 1000
+    max-http-form-post-size: 1MB
+    remoteip:
+      internal-proxies: "10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|192\\.168\\.\\d{1,3}\\.\\d{1,3}|172\\.(1[6-9]|2[0-9]|3[0-1])\\.\\d{1,3}\\.\\d{1,3}|127\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|0:0:0:0:0:0:0:1|::1"
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+      group:
+        # Ready = can serve requests: database and Redis. A RabbitMQ outage does not take the API offline
+        # (jobs fall back to in-process execution), so it is reported but not part of readiness.
+        readiness:
+          include: readinessState,mongo,redis
+        liveness:
+          include: livenessState
+  metrics:
+    tags:
+      application: campusconnect-api
+
+# OpenAPI docs on the API port only (Nginx does not proxy them); switched off in production.
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  client-url: ${CLIENT_URL:http://localhost:3000}
+  public-api-url: ${PUBLIC_API_URL:}
+  jwt:
+    access-secret: ${JWT_ACCESS_SECRET:}
+    refresh-secret: ${JWT_REFRESH_SECRET:}
+    access-token-ttl: ${ACCESS_TOKEN_TTL:15m}
+    refresh-token-ttl: ${REFRESH_TOKEN_TTL:7d}
+    cookie-secure: ${COOKIE_SECURE:true}
+    cookie-same-site: ${COOKIE_SAME_SITE:Strict}
+  security:
+    # BCrypt cost, as in Node (12: about 250 ms of CPU per sign-in), and how many sign-ins one replica hashes at
+    # once (0 = one less than its CPUs, at most 4, so a burst of sign-ins never takes every CPU from the API).
+    bcrypt-strength: ${BCRYPT_STRENGTH:12}
+    password-hash-threads: ${PASSWORD_HASH_THREADS:0}
+  university:
+    domain: ${UNIVERSITY_DOMAIN:ddu.ac.in}
+    name: ${UNIVERSITY_NAME:Dharmsinh Desai University}
+    timezone-offset: ${UNIVERSITY_TZ_OFFSET:+05:30}
+  bootstrap-admin:
+    email: ${BOOTSTRAP_ADMIN_EMAIL:}
+    password: ${BOOTSTRAP_ADMIN_PASSWORD:}
+    name: ${BOOTSTRAP_ADMIN_NAME:University Admin}
+  mail:
+    mode: ${MAIL_MODE:auto}
+    from: ${MAIL_FROM:CampusConnect <no-reply@campusconnect.local>}
+    brevo-api-key: ${BREVO_API_KEY:}
+    rate-per-minute: ${EMAIL_RATE_PER_MINUTE:30}
+  cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+    api-key: ${CLOUDINARY_API_KEY:}
+    api-secret: ${CLOUDINARY_API_SECRET:}
+    folder: ${CLOUDINARY_FOLDER:campusconnect}
+  push:
+    public-key: ${VAPID_PUBLIC_KEY:}
+    private-key: ${VAPID_PRIVATE_KEY:}
+    subject: ${VAPID_SUBJECT:mailto:admin@campusconnect.local}
+  uploads:
+    dir: ${UPLOAD_DIR:uploads}
+    max-bytes: ${MAX_UPLOAD_BYTES:5242880}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    window: 15m
+    api: ${API_RATE_LIMIT:2000}
+    auth: ${AUTH_RATE_LIMIT:100}
+    upload: ${UPLOAD_RATE_LIMIT:120}
+    sign-in-failures: ${SIGN_IN_FAILURE_LIMIT:10}
+  realtime:
+    broker: ${REALTIME_BROKER:relay}
+    relay-host: ${RABBITMQ_HOST:localhost}
+    relay-port: ${RABBITMQ_STOMP_PORT:61613}
+    relay-login: ${RABBITMQ_USER:guest}
+    relay-passcode: ${RABBITMQ_PASSWORD:guest}
+  jobs:
+    mode: ${JOBS_MODE:rabbit}
+  redis:
+    # Redis database of the shared Spring caches (kept apart so clearing a cache scans only cache keys).
+    cache-database: ${REDIS_CACHE_DATABASE:1}
+  mongo:
+    max-pool-size: ${MONGO_MAX_POOL_SIZE:100}
+    min-pool-size: ${MONGO_MIN_POOL_SIZE:10}
+  seed:
+    reference-data: ${SEED_REFERENCE_DATA:true}
+    demo: ${SEED_DEMO:false}
+    load-test-users: ${SEED_LOAD_TEST_USERS:0}
+    load-test-allow-production: ${SEED_LOAD_TEST_ALLOW_PRODUCTION:false}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.data.mongodb.core.index: WARN
+    org.mongodb.driver: WARN

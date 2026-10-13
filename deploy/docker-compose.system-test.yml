@@ -1,0 +1,21 @@
+# Overlay for the Playwright system tests (system-tests/README.md): the real stack (Nginx, 2 API replicas,
+# Redis, RabbitMQ, MongoDB replica set) with e-mail going to Mailpit, a mail catcher whose HTTP API the tests
+# read verification codes from. Two replicas make the tests cross replicas (chat relay, shared caches).
+services:
+  api:
+    environment:
+      MAIL_MODE: smtp
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_AUTH: "false"
+      SMTP_STARTTLS: "false"
+    deploy:
+      replicas: 2
+    depends_on:
+      mailpit:
+        condition: service_started
+
+  mailpit:
+    image: axllent/mailpit:v1.31.5
+    ports:
+      - "127.0.0.1:8025:8025"

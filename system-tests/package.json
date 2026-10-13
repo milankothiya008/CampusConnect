@@ -1,0 +1,15 @@
+{
+  "name": "campusconnect-system-tests",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "stack:up": "cd ../deploy && docker compose --env-file system-test.env -f docker-compose.yml -f docker-compose.system-test.yml --profile local up -d --build --wait",
+    "stack:down": "cd ../deploy && docker compose --env-file system-test.env -f docker-compose.yml -f docker-compose.system-test.yml --profile local down -v",
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}

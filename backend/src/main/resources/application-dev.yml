@@ -1,0 +1,19 @@
+# Local development without Docker for RabbitMQ: in-memory STOMP broker and in-process jobs.
+# Start MongoDB and Redis with: docker compose -f deploy/docker-compose.yml --profile local up -d mongo redis
+app:
+  jwt:
+    cookie-secure: false
+    cookie-same-site: Lax
+  realtime:
+    broker: ${REALTIME_BROKER:simple}
+  jobs:
+    mode: ${JOBS_MODE:direct}
+
+management:
+  health:
+    rabbit:
+      enabled: false
+
+logging:
+  level:
+    com.campusconnect: DEBUG

@@ -1,0 +1,58 @@
+# Integration tests: MongoDB and Redis come from Testcontainers (support.TestcontainersConfig); RabbitMQ is not
+# needed (in-memory STOMP broker, jobs run in the calling thread, e-mails land in the DevInbox).
+spring:
+  data:
+    redis:
+      # Generous on busy CI machines.
+      timeout: 10s
+
+app:
+  client-url: http://localhost:3000
+  jwt:
+    access-secret: test-access-secret-that-is-long-enough-for-hs256
+    refresh-secret: test-refresh-secret-that-is-long-enough-for-hs256
+    cookie-secure: false
+  university:
+    domain: ddu.ac.in
+    timezone-offset: "+05:30"
+  bootstrap-admin:
+    email: ""
+    password: ""
+  mail:
+    mode: preview
+  realtime:
+    broker: simple
+  jobs:
+    mode: direct
+  scheduling:
+    enabled: false
+  rate-limit:
+    enabled: false
+  seed:
+    reference-data: false
+  security:
+    bcrypt-strength: 4
+  uploads:
+    dir: ${java.io.tmpdir}/campusconnect-test-uploads
+  cloudinary:
+    cloud-name: ""
+  push:
+    public-key: ""
+    private-key: ""
+  mongo:
+    min-pool-size: 0
+
+app.mail.preview-limit: 100000
+
+management:
+  health:
+    rabbit:
+      enabled: false
+    mail:
+      enabled: false
+
+logging:
+  level:
+    root: WARN
+    com.campusconnect: INFO
+    org.testcontainers: INFO

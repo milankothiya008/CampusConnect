@@ -1,0 +1,11 @@
+# Build context of the web image (deploy/web/Dockerfile builds from the repository root; the API image uses
+# backend/ and its own .dockerignore). Only the frontend sources and the Nginx files go in: never the local
+# node_modules (built for this machine's OS, and huge), build output, test artefacts or secrets.
+*
+!frontend
+!deploy/web
+frontend/node_modules
+frontend/dist
+frontend/coverage
+**/.env
+**/.env.*

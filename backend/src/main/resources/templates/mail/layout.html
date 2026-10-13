@@ -1,0 +1,25 @@
+<div style="font-family:Segoe UI,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a">
+    <div style="font-weight:700;font-size:18px;color:#1d4ed8;margin-bottom:18px">CampusConnect</div>
+    <img th:if="${image}" th:src="${image}" alt="" width="512" style="display:block;width:100%;max-width:512px;height:auto;border-radius:12px;margin:0 0 18px" />
+    <h2 style="margin:0 0 14px;font-size:20px" th:text="${heading}">Heading</h2>
+    <p th:each="paragraph : ${paragraphs}" style="margin:0 0 14px;line-height:1.55" th:text="${paragraph}">Paragraph</p>
+    <table th:if="${!details.isEmpty()}" role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:6px 0 18px;border-collapse:collapse;background:#f8fafc;border-radius:10px">
+        <tr th:each="row : ${details}">
+            <td style="padding:9px 14px;font-size:13px;color:#64748b;width:110px;vertical-align:top" th:text="${row['label']}">Label</td>
+            <td style="padding:9px 14px;font-size:14px;font-weight:600" th:text="${row['value']}">Value</td>
+        </tr>
+    </table>
+    <th:block th:if="${qr}">
+        <p style="margin:6px 0 4px;text-align:center"><img th:src="${qr['src']}" th:alt="${qr['alt']}" width="240" height="240" style="display:inline-block;width:240px;height:240px;border:1px solid #e2e8f0;border-radius:12px;background:#fff" /></p>
+        <p style="font-size:12px;color:#64748b;line-height:1.5;text-align:center;margin:0 0 6px">Show this QR code at the entrance</p>
+    </th:block>
+    <p th:if="${code}" style="margin:22px 0;font-size:32px;font-weight:700;letter-spacing:10px;font-family:Consolas,Menlo,monospace;color:#0f172a;background:#eff6ff;border-radius:10px;padding:14px 0;text-align:center" th:text="${code}">000000</p>
+    <th:block th:if="${action}">
+        <p style="margin:22px 0"><a th:href="${action['url']}" style="background:#1d4ed8;color:#fff;padding:11px 20px;border-radius:8px;text-decoration:none;font-weight:600" th:text="${action['label']}">Open</a></p>
+        <p style="font-size:12px;color:#64748b;line-height:1.5" th:text="|If the button does not work, open this link: ${action['url']}|">Link</p>
+    </th:block>
+    <p th:if="${footnote}" style="font-size:13px;color:#64748b;line-height:1.5" th:text="${footnote}">Footnote</p>
+    <p th:if="${reason}" style="font-size:12px;color:#64748b;line-height:1.5;margin:24px 0 4px" th:text="${reason}">Reason</p>
+    <p th:if="${!footerLinks.isEmpty()}" style="font-size:12px;color:#64748b;line-height:1.5;margin:4px 0 0"><th:block th:each="link, state : ${footerLinks}"><a th:href="${link['url']}" style="color:#64748b;text-decoration:underline" th:text="${link['label']}">Link</a><th:block th:unless="${state.last}"> &nbsp;&middot;&nbsp; </th:block></th:block></p>
+    <p th:style="${reason != null || !footerLinks.isEmpty()} ? 'font-size:12px;color:#64748b;line-height:1.5;margin-top:10px' : 'font-size:12px;color:#64748b;line-height:1.5;margin-top:28px'" th:text="|${universityName} · CampusConnect|">University · CampusConnect</p>
+</div>

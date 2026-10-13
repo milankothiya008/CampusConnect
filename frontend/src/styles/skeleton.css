@@ -1,0 +1,298 @@
+/* ================================================================ Skeletons
+ * Content-shaped placeholders while data loads (components/ui/Skeletons.jsx). The shapes follow the theme
+ * tokens, so they read in light and dark mode alike; the shimmer moves with a transform (no repaints) and
+ * stops entirely when the system asks for reduced motion.
+ */
+
+:root {
+    --skeleton-base: var(--neutral-100);
+    --skeleton-shine: rgba(255, 255, 255, 0.65);
+}
+
+:root[data-theme="dark"] {
+    --skeleton-base: var(--neutral-100);
+    --skeleton-shine: rgba(255, 255, 255, 0.055);
+}
+
+.skeleton {
+    position: relative;
+    display: block;
+    flex-shrink: 0;
+    max-width: 100%;
+    overflow: hidden;
+    background: var(--skeleton-base);
+    border-radius: var(--radius);
+}
+
+.skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, var(--skeleton-shine), transparent);
+    transform: translateX(-100%);
+    animation: skeleton-shine 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shine {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton::after {
+        display: none;
+        animation: none;
+    }
+}
+
+/* ---------------------------------------------------------------- Building blocks */
+.skeleton-region {
+    min-width: 0;
+}
+
+.sk-circle {
+    border-radius: 50%;
+}
+
+.sk-fixed {
+    flex: none;
+}
+
+.sk-grow {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.sk-lines {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sk-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.sk-content {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 6px 0;
+}
+
+.sk-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.sk-page-header .page-header-title {
+    gap: 8px;
+}
+
+/* Placeholders are not controls: no hover states, nothing to click. */
+.sk-tabs,
+.sk-list-row,
+.chat-row.is-skeleton {
+    pointer-events: none;
+}
+
+.sk-tabs .tab::after {
+    display: none;
+}
+
+/* ---------------------------------------------------------------- Cards */
+.sk-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.sk-card-media {
+    width: 100%;
+    aspect-ratio: 16 / 8;
+}
+
+.sk-card.is-result .sk-card-media {
+    aspect-ratio: 16 / 9;
+}
+
+.sk-card-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px 18px;
+}
+
+.sk-card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+/* Like the club card: the logo rises into the banner, the name sits beside it, below the banner. */
+.sk-club-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: -38px;
+}
+
+.sk-club-head > .sk-lines {
+    padding-top: 26px;
+}
+
+.sk-club-logo {
+    box-shadow: 0 0 0 3px var(--surface);
+}
+
+.sk-plain-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sk-panels {
+    align-items: start;
+}
+
+/* ---------------------------------------------------------------- Detail pages, forms, tables */
+.sk-poster {
+    width: 100%;
+    border-radius: var(--radius-xl);
+}
+
+.sk-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sk-stepper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+}
+
+.sk-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sk-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.sk-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sk-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.sk-table-lead {
+    min-width: 200px;
+}
+
+/* ---------------------------------------------------------------- Feed, explore, profiles */
+.sk-feed {
+    display: flex;
+    flex-direction: column;
+    gap: inherit;
+}
+
+.sk-post-head {
+    padding: 16px;
+}
+
+.sk-post-media {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+}
+
+.sk-post-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+}
+
+.sk-tile-square {
+    width: 100%;
+    aspect-ratio: 1;
+}
+
+.sk-avatar-xl,
+.sk-avatar-club {
+    width: 150px;
+    height: 150px;
+}
+
+.sk-tile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+
+@media (max-width: 767px) {
+    .sk-avatar-xl,
+    .sk-avatar-club {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* ---------------------------------------------------------------- Chat */
+.sk-chat-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.sk-bubbles {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.sk-bubble.is-mine {
+    align-self: flex-end;
+}
+
+.sk-bubble.is-theirs {
+    align-self: flex-start;
+}
+
+/* ---------------------------------------------------------------- Event planner */
+.sk-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sk-timeline-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
