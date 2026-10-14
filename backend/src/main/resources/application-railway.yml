@@ -18,6 +18,9 @@ server:
       trusted-proxies: ".*"
 
 app:
+  # Vercel's rewrite forwards the visitor's address in X-Vercel-Forwarded-For; Railway's edge replaces
+  # X-Forwarded-For with Vercel's own (core.web.ClientIpFilter).
+  client-ip-header: ${CLIENT_IP_HEADER:X-Vercel-Forwarded-For}
   realtime:
     # One API instance: the in-process STOMP broker. Before adding replicas, run RabbitMQ with the STOMP plugin
     # and set REALTIME_BROKER=relay.

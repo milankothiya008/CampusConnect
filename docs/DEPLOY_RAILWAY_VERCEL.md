@@ -162,9 +162,10 @@ The first deploy takes a few minutes (Maven build, then the image). It is live w
 
 ## Notes
 
-- **Visitor IPs**: through Vercel, `X-Forwarded-For` starts with the visitor's address, and the `railway` profile
-  trusts it so rate limits are per visitor. Requests sent straight to the Railway address can set that header
-  themselves, but the per-account limits still hold: 10 wrong passwords per account per 15 minutes, 5 tries per
-  e-mailed code.
+- **Visitor IPs**: Railway's edge replaces `X-Forwarded-For` with the address it sees, so requests through Vercel
+  would all appear to come from Vercel. Vercel also sends the visitor's address as `X-Vercel-Forwarded-For`, and
+  the `railway` profile uses that (`ClientIpFilter`, `CLIENT_IP_HEADER`) so per-address rate limits count
+  visitors. A caller going straight to the Railway address could set that header themselves; the per-account
+  limits don't depend on it (10 wrong passwords per account per 15 minutes, 5 tries per e-mailed code).
 - **Preview deployments** on Vercel use other addresses than `CLIENT_URL`, so live chat (which checks the
   WebSocket origin) only connects on the production address.
