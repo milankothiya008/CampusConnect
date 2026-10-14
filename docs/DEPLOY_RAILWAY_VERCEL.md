@@ -9,7 +9,7 @@ browser ──https──▶ Vercel  (React app; /api/* and /uploads/* are rewri
    │
    └──wss──▶ Railway: api (/ws live chat; Vercel can't proxy WebSockets)
                  │  private network
-                 ├── Mongo Single Replica  (MongoDB 8, single-node replica set: transactions work)
+                 ├── MongoDB               (MongoDB 8, single-node replica set: transactions work)
                  ├── Redis                 (caches, rate limits, presence, scheduler locks)
                  └── rabbitmq              (e-mail and push queues with retries)
 External: Brevo (e-mail over HTTPS — Railway blocks SMTP below the Pro plan), Cloudinary (photos and videos).
@@ -46,10 +46,33 @@ Vercel's Hobby plan is free for this app.
 Create a project, then add the services in this order.
 
 1. **Redis**: *New → Template → Redis* (Railway's verified template).
-2. **MongoDB**: *New → Template → "MongoDB Single Replica"* (Railway's own template, source
-   `railwayapp-templates/mongo-replica-set`). It creates `Mongo Single Replica` and a one-off
-   `Init Single Replica` job that turns it into a replica set; the job stops once it has run.
-3. **RabbitMQ**: *New → Docker Image → `rabbitmq:4.1-alpine`*, name it `rabbitmq`, with these variables:
+2. **MongoDB**: *New → Database → MongoDB* (Railway's standard template, image `mongo:8.0`, service `MongoDB`
+   with a volume on `/data/db`). The API's transactions need a replica set, so turn it into a single-node one:
+   add these variables to the MongoDB service, then replace its **Start Command** (Settings → Deploy).
+
+   | Variable | Value |
+   |---|---|
+   | `MONGO_REPLICA_KEY` | a random string of letters and digits, 32–100 long (the replica set's internal keyfile) |
+   | `MONGO_RS_NAME` | `rs0` |
+   | `MONGO_RS_HOST` | `localhost:27017` |
+
+   ```sh
+   /bin/sh -c "printf %s $MONGO_REPLICA_KEY > /data/db/rs.key; chmod 400 /data/db/rs.key; chown mongodb:mongodb /data/db/rs.key; (until mongosh --quiet -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin --eval 'try { rs.status().ok } catch (e) { rs.initiate({_id: process.env.MONGO_RS_NAME, members: [{_id: 0, host: process.env.MONGO_RS_HOST}]}).ok }' 2>/dev/null | grep -q 1; do sleep 3; done; echo replica-set-ready) & exec docker-entrypoint.sh mongod --replSet rs0 --keyFile /data/db/rs.key --oplogSize 64 --wiredTigerCacheSizeGB 0.25 --wiredTigerEngineConfigString 'log=(prealloc=false,file_max=10MB)' --setParameter indexBuildMinAvailableDiskSpaceMB=10 --ipv6 --bind_ip ::,0.0.0.0 --setParameter diagnosticDataCollectionEnabled=false"
+   ```
+
+   Why each part is there:
+   - The member is registered as `localhost:27017` and clients connect with `directConnection=true` (see
+     `MONGODB_URI` below). A member named after the private domain can't verify itself while a restarted container's
+     DNS entry is still settling, and then never becomes primary.
+   - The background loop initiates the replica set once (it is a no-op on later starts); the log shows
+     `replica-set-ready`.
+   - Small-disk settings for the trial's 500 MB volume: a 64 MB oplog, no pre-allocated journal files, and index
+     builds allowed with less than MongoDB's default 500 MB free (the API builds its indexes at startup).
+   - The oplog size only applies when the replica set is created: set all this up before the first start, or reset
+     the volume.
+3. **RabbitMQ**: *New → Database → RabbitMQ* (or *Docker Image → `rabbitmq:4.1-alpine`*, named `RabbitMQ`). It
+   only needs the private network: remove any TCP proxy it gets (public AMQP port) and the optional web UI
+   service. Variables:
 
    | Variable | Value |
    |---|---|
@@ -73,9 +96,9 @@ Create a project, then add the services in this order.
    | Variable | Value |
    |---|---|
    | `SPRING_PROFILES_ACTIVE` | `prod,railway` ([`application-railway.yml`](../backend/src/main/resources/application-railway.yml): health is the only public actuator endpoint, visitor IPs from `X-Forwarded-For`, in-process chat broker for one instance, smaller pools) |
-   | `MONGODB_URI` | `mongodb://${{Mongo Single Replica.MONGO_INITDB_ROOT_USERNAME}}:${{Mongo Single Replica.MONGO_INITDB_ROOT_PASSWORD}}@${{Mongo Single Replica.RAILWAY_PRIVATE_DOMAIN}}:27017/campusconnect?replicaSet=rs0&authSource=admin` |
+   | `MONGODB_URI` | `mongodb://${{MongoDB.MONGO_INITDB_ROOT_USERNAME}}:${{MongoDB.MONGO_INITDB_ROOT_PASSWORD}}@${{MongoDB.RAILWAY_PRIVATE_DOMAIN}}:27017/campusconnect?directConnection=true&authSource=admin` |
    | `REDIS_HOST` / `REDIS_PORT` / `REDIS_PASSWORD` | `${{Redis.REDISHOST}}` / `${{Redis.REDISPORT}}` / `${{Redis.REDISPASSWORD}}` |
-   | `RABBITMQ_HOST` / `RABBITMQ_USER` / `RABBITMQ_PASSWORD` | `${{rabbitmq.RAILWAY_PRIVATE_DOMAIN}}` / `${{rabbitmq.RABBITMQ_DEFAULT_USER}}` / `${{rabbitmq.RABBITMQ_DEFAULT_PASS}}` |
+   | `RABBITMQ_HOST` / `RABBITMQ_USER` / `RABBITMQ_PASSWORD` | `${{RabbitMQ.RAILWAY_PRIVATE_DOMAIN}}` / `${{RabbitMQ.RABBITMQ_DEFAULT_USER}}` / `${{RabbitMQ.RABBITMQ_DEFAULT_PASS}}` |
    | `JOBS_MODE` | `rabbit` |
    | `CLIENT_URL` | the Vercel address from step 3, e.g. `https://campusconnect-java.vercel.app` (CORS, WebSocket origin, links in e-mails) |
    | `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | two different random strings of at least 32 bytes (`openssl rand -base64 48`) |
@@ -86,7 +109,7 @@ Create a project, then add the services in this order.
    | `UNIVERSITY_DOMAIN`, `UNIVERSITY_NAME`, `UNIVERSITY_TZ_OFFSET` | e.g. `ddu.ac.in`, `Dharmsinh Desai University`, `+05:30` |
    | `JAVA_TOOL_OPTIONS` | `-XX:ActiveProcessorCount=2 -XX:+UseSerialGC -Xms64m -Xmx256m -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=96m -XX:MaxDirectMemorySize=96m -Xss512k -XX:+ExitOnOutOfMemoryError` (about 400 MB under load instead of up to 75 % of the container) |
 
-   Railway sets `PORT`; the API listens on it.
+   Also set `PORT` to `8080` (the port the generated domain points at).
 
 The first deploy takes a few minutes (Maven build, then the image). It is live when the healthcheck passes:
 `https://<api-domain>/api/health` answers `{"success":true,…}`.
@@ -125,7 +148,7 @@ The first deploy takes a few minutes (Maven build, then the image). It is live w
   something under `backend/` changed, and switches over once the new instance passes its healthcheck.
 - **Logs and metrics**: Railway → `api` → Deployments / Metrics; Vercel → Deployments.
 - **Secrets**: rotate them in the platforms' Variables pages; never commit them (`.env` files are git-ignored).
-- **Backups**: MongoDB data lives on the `Mongo Single Replica` volume. Take dumps with `mongodump` through a
+- **Backups**: MongoDB data lives on the `MongoDB` service's volume. Take dumps with `mongodump` through a
   temporary TCP proxy, or move to MongoDB Atlas by changing `MONGODB_URI`.
 
 ## 6. Growing past one instance
