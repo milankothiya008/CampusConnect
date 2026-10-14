@@ -5,6 +5,9 @@ mentors, events with approval workflows, registrations with waitlists, teams and
 certificates, results and hackathons, recruitment drives, a social feed with stories and galleries, live chat
 and anonymous club elections.
 
+**Live**: https://frontend-lime-gamma-65.vercel.app (web app on Vercel; API on Railway at
+https://incredible-strength-production-709c.up.railway.app).
+
 This is the Spring Boot rewrite of the original MERN application. It keeps the **same features and the same
 REST API**, so the React frontend is reused, and it is built to serve **5,000 concurrent users**.
 
