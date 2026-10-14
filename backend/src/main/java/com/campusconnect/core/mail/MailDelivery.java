@@ -6,12 +6,14 @@ import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Delivers one queued e-mail. Bulk mail obeys a cluster-wide sending rate (one Bucket4j bucket in Redis shared
  * by every replica, like EMAIL_RATE_PER_MINUTE) so the provider's limits are respected; one-time codes skip it.
+ * Addresses matching app.mail.suppress-pattern are dropped here, before they use up any of that rate.
  */
 @Slf4j
 @Component
@@ -23,16 +25,23 @@ public class MailDelivery {
     private final MailStats stats;
     private final ProxyManager<byte[]> buckets;
     private final AppProperties properties;
+    private final Pattern suppressed;
 
     public MailDelivery(MailTransport transport, MailStats stats, ProxyManager<byte[]> buckets, AppProperties properties) {
         this.transport = transport;
         this.stats = stats;
         this.buckets = buckets;
         this.properties = properties;
+        String pattern = properties.getMail().getSuppressPattern();
+        this.suppressed = pattern == null || pattern.isBlank() ? null : Pattern.compile(pattern.trim(), Pattern.CASE_INSENSITIVE);
     }
 
     /** Throws when the provider refuses the e-mail (the caller decides about retries). */
     public void deliver(MailJob job, boolean throttle) throws Exception {
+        if (suppressed != null && job.to() != null && suppressed.matcher(job.to()).matches()) {
+            log.debug("Email to a suppressed address not sent: {}", job.subject());
+            return;
+        }
         if (throttle && !job.immediate()) {
             waitForSendingSlot();
         }

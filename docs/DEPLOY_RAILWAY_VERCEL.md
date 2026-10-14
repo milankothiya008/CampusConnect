@@ -104,6 +104,7 @@ Create a project, then add the services in this order.
    | `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | two different random strings of at least 32 bytes (`openssl rand -base64 48`) |
    | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | push notification keys (`npx web-push generate-vapid-keys`) and `mailto:<your address>` |
    | `BREVO_API_KEY`, `MAIL_FROM` | your Brevo key and verified sender, e.g. `CampusConnect <you@example.com>` |
+   | `MAIL_SUPPRESS_PATTERN` | optional: addresses that are never e-mailed (a regular expression for the whole address). With demo data loaded, `\d{2}[a-z]{2}dmo\d{3}@ddu\.ac\.in\|demo\.[a-z]{2}@ddu\.ac\.in` keeps reminders and other mail to the made-up demo accounts from going out |
    | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | your Cloudinary credentials |
    | `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD`, `BOOTSTRAP_ADMIN_NAME` | the first admin account, created at the first start |
    | `UNIVERSITY_DOMAIN`, `UNIVERSITY_NAME`, `UNIVERSITY_TZ_OFFSET` | e.g. `ddu.ac.in`, `Dharmsinh Desai University`, `+05:30` |

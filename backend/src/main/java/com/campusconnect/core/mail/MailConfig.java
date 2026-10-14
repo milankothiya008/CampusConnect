@@ -78,5 +78,9 @@ public class MailConfig {
             default -> {
             }
         }
+        String suppressed = properties.getMail().getSuppressPattern();
+        if (suppressed != null && !suppressed.isBlank()) {
+            log.info("Emails to addresses matching {} are not sent (MAIL_SUPPRESS_PATTERN)", suppressed.trim());
+        }
     }
 }

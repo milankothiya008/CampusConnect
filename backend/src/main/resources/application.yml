@@ -141,6 +141,7 @@ app:
     from: ${MAIL_FROM:CampusConnect <no-reply@campusconnect.local>}
     brevo-api-key: ${BREVO_API_KEY:}
     rate-per-minute: ${EMAIL_RATE_PER_MINUTE:30}
+    suppress-pattern: ${MAIL_SUPPRESS_PATTERN:}
   cloudinary:
     cloud-name: ${CLOUDINARY_CLOUD_NAME:}
     api-key: ${CLOUDINARY_API_KEY:}

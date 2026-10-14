@@ -79,6 +79,11 @@ public class AppProperties {
         private String brevoApiKey = "";
         /** Cluster-wide sending rate for queued e-mails. */
         private int ratePerMinute = 30;
+        /**
+         * Addresses that are never e-mailed: a regular expression matched against the whole address, ignoring case
+         * (e.g. the made-up demo accounts on a demo site). Empty: every address is e-mailed.
+         */
+        private String suppressPattern = "";
     }
 
     @Getter
