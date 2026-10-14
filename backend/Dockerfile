@@ -6,9 +6,11 @@ FROM eclipse-temurin:25-jdk-alpine AS build
 WORKDIR /src
 COPY .mvn .mvn
 COPY mvnw pom.xml ./
-RUN --mount=type=cache,target=/root/.m2 sh mvnw -B -q dependency:go-offline
+# Dependencies in their own layer: rebuilt only when pom.xml changes. (No BuildKit cache mounts: Railway's builder
+# rejects them unless they carry its service-specific id.)
+RUN sh mvnw -B -q dependency:go-offline
 COPY src src
-RUN --mount=type=cache,target=/root/.m2 sh mvnw -B -q package -DskipTests \
+RUN sh mvnw -B -q -o package -DskipTests \
     && java -Djarmode=tools -jar target/campusconnect-api.jar extract --layers --launcher --destination /layers
 
 FROM eclipse-temurin:25-jre-alpine
