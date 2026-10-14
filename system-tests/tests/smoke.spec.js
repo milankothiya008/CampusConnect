@@ -7,7 +7,8 @@ test.describe("edge", () => {
         expect(response.status()).toBe(200);
         const headers = response.headers();
         expect(headers["content-security-policy"]).toContain("default-src 'self'");
-        expect(headers["content-security-policy"]).toMatch(/script-src 'self' 'sha256-/);
+        // No inline scripts at all (the theme bootstrap is /theme.js): scripts only from the app's own origin.
+        expect(/script-src ([^;]*)/.exec(headers["content-security-policy"])[1].trim()).toBe("'self'");
         expect(headers["x-frame-options"]).toBe("DENY");
         expect(headers["x-content-type-options"]).toBe("nosniff");
         expect(headers["cache-control"]).toBe("no-cache");

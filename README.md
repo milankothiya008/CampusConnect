@@ -69,5 +69,10 @@ Without an e-mail provider, verification codes appear in the development inbox a
 
 ## Production
 
-`cd deploy && cp .env.example .env && docker compose up -d --build` — details, sizing, TLS, backups and the
-security checklist are in [`deploy/README.md`](deploy/README.md).
+Two ways to run it live:
+
+- **Railway + Vercel** (like the original MERN site): Vercel serves the web app, Railway runs the API, MongoDB,
+  Redis and RabbitMQ, and every `git push` redeploys. Step by step in
+  [`docs/DEPLOY_RAILWAY_VERCEL.md`](docs/DEPLOY_RAILWAY_VERCEL.md).
+- **One VPS with Docker Compose**: `cd deploy && cp .env.example .env && docker compose up -d --build` — details,
+  sizing, TLS, backups and the security checklist are in [`deploy/README.md`](deploy/README.md).

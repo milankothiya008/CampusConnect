@@ -21,7 +21,7 @@ The Docker Compose deployment in [`deploy/`](../deploy/README.md) is the alterna
 
 Railway bills what the services use: RAM $10 per GB per month, CPU $20 per vCPU per month (see
 [railway.com/pricing](https://railway.com/pricing)). Tuned as below, the four services use about 0.7 GB of RAM
-together (API ≈ 350 MB, MongoDB ≈ 150 MB, RabbitMQ ≈ 120 MB, Redis ≈ 10 MB) and little CPU while traffic is low:
+together (API ≈ 400 MB, MongoDB ≈ 150 MB, RabbitMQ ≈ 120 MB, Redis ≈ 10 MB) and little CPU while traffic is low:
 roughly **$7–9 per month**.
 
 | Railway plan | Works? |
@@ -84,7 +84,7 @@ Create a project, then add the services in this order.
    | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | your Cloudinary credentials |
    | `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD`, `BOOTSTRAP_ADMIN_NAME` | the first admin account, created at the first start |
    | `UNIVERSITY_DOMAIN`, `UNIVERSITY_NAME`, `UNIVERSITY_TZ_OFFSET` | e.g. `ddu.ac.in`, `Dharmsinh Desai University`, `+05:30` |
-   | `JAVA_TOOL_OPTIONS` | `-XX:ActiveProcessorCount=2 -XX:+UseSerialGC -Xms64m -Xmx256m -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=96m -XX:MaxDirectMemorySize=96m -Xss512k -XX:+ExitOnOutOfMemoryError` (≈ 350 MB under load instead of up to 75 % of the container) |
+   | `JAVA_TOOL_OPTIONS` | `-XX:ActiveProcessorCount=2 -XX:+UseSerialGC -Xms64m -Xmx256m -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=96m -XX:MaxDirectMemorySize=96m -Xss512k -XX:+ExitOnOutOfMemoryError` (about 400 MB under load instead of up to 75 % of the container) |
 
    Railway sets `PORT`; the API listens on it.
 
@@ -93,9 +93,9 @@ The first deploy takes a few minutes (Maven build, then the image). It is live w
 
 ## 3. Vercel
 
-1. In [`frontend/vercel.json`](../frontend/vercel.json), put your API domain in the two rewrites
-   (`/api/:path*` and `/uploads/:path*`) and in the `connect-src` of the Content-Security-Policy header. Commit and
-   push.
+1. In [`frontend/vercel.json`](../frontend/vercel.json), replace `YOUR-API-DOMAIN.up.railway.app` (three places:
+   the `/api` and `/uploads` rewrites and the Content-Security-Policy's `connect-src`) with your API domain. Commit
+   and push.
 2. *Add New → Project → import this repository*. Set **Root Directory** to `frontend`; `vercel.json` pins the
    framework (Vite) and the output directory.
 3. **Environment Variables** (Production and Preview):

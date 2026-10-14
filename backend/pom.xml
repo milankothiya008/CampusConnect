@@ -34,6 +34,12 @@
         <testcontainers-redis.version>3.0.0</testcontainers-redis.version>
         <jacoco.version>0.8.15</jacoco.version>
         <dependency-check.version>13.0.0</dependency-check.version>
+        <!-- Security patches ahead of Spring Boot's next release (HIGH CVEs fixed in these patch versions, found by
+             the CI image scan). Remove each once Boot's managed version is at least this. -->
+        <jackson-2-bom.version>2.21.7</jackson-2-bom.version>
+        <jackson-bom.version>3.1.7</jackson-bom.version>
+        <rabbit-amqp-client.version>5.34.0</rabbit-amqp-client.version>
+        <tomcat.version>11.0.25</tomcat.version>
     </properties>
 
     <dependencies>

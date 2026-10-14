@@ -20,5 +20,7 @@ COPY deploy/web/nginx.conf /etc/nginx/nginx.conf
 COPY deploy/web/snippets/ /etc/nginx/snippets/
 COPY deploy/web/sites/ /etc/nginx/sites/
 COPY deploy/web/entrypoint/ /docker-entrypoint.d/
-RUN chmod +x /docker-entrypoint.d/*.sh && rm -f /etc/nginx/conf.d/default.conf
+# Pick up Alpine security fixes released after the base image was built.
+RUN apk upgrade --no-cache \
+    && chmod +x /docker-entrypoint.d/*.sh && rm -f /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
