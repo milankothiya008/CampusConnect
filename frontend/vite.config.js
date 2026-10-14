@@ -1,7 +1,26 @@
+import { readFileSync } from "node:fs";
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 
+/**
+ * On Vercel the API runs elsewhere (Railway) and Vercel can't proxy WebSockets, so live chat connects straight to
+ * the address the /api rewrite in vercel.json points at (as the MERN version did). Empty everywhere else: the page's
+ * own origin (Nginx or the dev server proxies /ws).
+ */
+const vercelChatUrl = () => {
+    if (!process.env.VERCEL) return "";
+    try {
+        const { rewrites = [] } = JSON.parse(readFileSync(new URL("./vercel.json", import.meta.url), "utf8"));
+        const api = rewrites.find((rewrite) => rewrite.source.startsWith("/api"));
+        return api ? `${new URL(api.destination).origin}/ws` : "";
+    } catch {
+        return "";
+    }
+};
+
 export default defineConfig(({ mode }) => {
+    // An explicit VITE_WS_URL still wins; Vite reads VITE_* from process.env after this config runs.
+    process.env.VITE_WS_URL ||= vercelChatUrl();
     // The shell's environment wins over .env files, so `VITE_API_PROXY=… npm run dev` always works.
     const env = { ...loadEnv(mode, process.cwd(), "VITE_"), ...process.env };
     // The Spring Boot API. In the Docker deployment Nginx serves the SPA and proxies the same paths.

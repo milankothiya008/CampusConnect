@@ -102,7 +102,7 @@ The first deploy takes a few minutes (Maven build, then the image). It is live w
 
    | Variable | Value |
    |---|---|
-   | `VITE_WS_URL` | `wss://<api-domain>/ws` (live chat connects to Railway directly) |
+   | `VITE_WS_URL` | optional: on Vercel builds the chat address is taken from the `/api` rewrite in `vercel.json` (`wss://<api-domain>/ws`); set it only to override that |
    | `VITE_UNIVERSITY_DOMAIN` | `ddu.ac.in` |
    | `VITE_UNIVERSITY_TIMEZONE` | `Asia/Kolkata` |
    | `VITE_UNIVERSITY_TZ_OFFSET` | `+05:30` |
